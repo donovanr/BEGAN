@@ -26,5 +26,5 @@ for n, fname in tqdm(enumerate(filenames)):
     image = get_image(fname, w, h)
     data[n] = image.flatten()
 
-with h5py.File(''.join(['datasets/celeba.h5']), 'w') as f:
+with h5py.File('celeba.h5', 'w') as f:
     f.create_dataset("images", data=data)

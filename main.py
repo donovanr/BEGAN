@@ -209,7 +209,7 @@ if __name__ == '__main__':
                         help='Start epoch (0 to begin training from scratch,'
                         + 'N to restore from checkpoint N)')
 
-    parser.add_argument('--add-epochs', type=int, default=100, required=True,
+    parser.add_argument('--add-epochs', type=int, default=500, required=True,
                         help='Number of epochs to train'
                         + '(-1 to train indefinitely)')
 
