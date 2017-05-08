@@ -263,7 +263,12 @@ if __name__ == '__main__':
                 batch_norm=args.batch_norm)
 
     if not args.train:
+        import os
+        import matplotlib
+        matplotlib.use('Agg')
         import matplotlib.pyplot as plt
+        if not os.path.exists(args.outdir):
+                os.makedirs(args.outdir)
         for n in range(8):
             im_to_save = im[n].reshape([64, 64, 3])
             plt.imsave(args.outdir+'/out_{}.jpg'.format(n),
