@@ -190,9 +190,9 @@ def _train(start_epoch, train, add_epochs, max_images=50000, **k):
             if len(images) < max_images:
                 break
             del images
-            time.sleep(30)  # Let my GPU cool down
-        print('full cycle finished. Good time to stop.')
-        time.sleep(60)
+            #time.sleep(30)  # Let my GPU cool down
+        #print('full cycle finished. Good time to stop.')
+        #time.sleep(60)
 
 
 if __name__ == '__main__':
