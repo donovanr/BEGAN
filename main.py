@@ -87,7 +87,7 @@ class BEGAN:
 
 
 def began_train(images, start_epoch=0, add_epochs=None, batch_size=16,
-                hidden_size=2048, dim=(64, 64, 3), gpu_id='/gpu:0',
+                hidden_size=2048, dim=(128, 128, 3), gpu_id='/gpu:0',
                 demo=False, get=False, start_learn_rate=1e-5, decay_every=50,
                 save_every=1, batch_norm=True, gamma=0.75):
 
@@ -168,7 +168,7 @@ def began_train(images, start_epoch=0, add_epochs=None, batch_size=16,
         batch = dataIterator([images], batch_size).__next__()
         ims = sess.run(x_tilde)
         plot_gens((ims, batch),
-                  ('Generated 64x64 samples.', 'Random training images.'),
+                  ('Generated 128x128 samples.', 'Random training images.'),
                   loss_tracker)
         if get:
             return ims
@@ -270,6 +270,6 @@ if __name__ == '__main__':
         if not os.path.exists(args.outdir):
                 os.makedirs(args.outdir)
         for n in range(8):
-            im_to_save = im[n].reshape([64, 64, 3])
+            im_to_save = im[n].reshape([128, 128, 3])
             plt.imsave(args.outdir+'/out_{}.jpg'.format(n),
                        im_to_save)

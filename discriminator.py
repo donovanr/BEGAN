@@ -20,14 +20,14 @@ def began_discriminator(D_I, batch_size, hidden_size,
     to the desired resolution.
 
     Args:
-        D_I: a batch of images [batch_size, 64 x 64 x 3]
+        D_I: a batch of images [batch_size, 128 x 128 x 3]
         batch_size: Batch size of encodings
         hidden_size: Dimensionality of encoding
         scope_name: Tensorflow scope name
         reuse_scope: Tensorflow scope handling
     Returns:
         Flattened tensor of re-created images, with dimensionality:
-            batch_size * 64 * 64 * 3
+            batch_size * 128 * 128 * 3
     '''
 
     n = 128  # 'n' is number of filters
@@ -36,7 +36,7 @@ def began_discriminator(D_I, batch_size, hidden_size,
             scope.reuse_variables()
 
         layer_1 = (pt.wrap(D_I)
-                   .reshape([-1, 64, 64, 3]))  # '-1' is batch size
+                   .reshape([-1, 128, 128, 3]))  # '-1' is batch size
 
         conv_0 = (layer_1
                   .custom_conv2d(3, k_h=3, k_w=3, d_h=1, d_w=1)
@@ -92,9 +92,9 @@ def began_discriminator(D_I, batch_size, hidden_size,
 
         decode_layer_1 = (layer_5  # (hidden_size)
                           .flatten()
-                          .fully_connected(8 * 8 * n, activation_fn=tf.nn.elu)
+                          .fully_connected(16 * 16 * n, activation_fn=tf.nn.elu)
                           #.fc_batch_norm()
-                          .reshape([-1, 8, 8, n]))  # '-1' is batch size
+                          .reshape([-1, 16, 16, n]))  # '-1' is batch size
 
         decode_conv_1 = (decode_layer_1
                          .custom_conv2d(n, k_h=3, k_w=3, d_h=1, d_w=1)
@@ -107,7 +107,7 @@ def began_discriminator(D_I, batch_size, hidden_size,
                          .apply(tf.nn.elu))
 
         decode_layer_2 = (decode_conv_2
-                          .apply(tf.image.resize_nearest_neighbor, [16, 16]))
+                          .apply(tf.image.resize_nearest_neighbor, [32, 32]))
 
         decode_conv_3 = (decode_layer_2
                          .custom_conv2d(n, k_h=3, k_w=3, d_h=1, d_w=1)
@@ -120,7 +120,7 @@ def began_discriminator(D_I, batch_size, hidden_size,
                          .apply(tf.nn.elu))
 
         decode_layer_3 = (decode_conv_4
-                          .apply(tf.image.resize_nearest_neighbor, [32, 32]))
+                          .apply(tf.image.resize_nearest_neighbor, [64, 64]))
 
         decode_conv_5 = (decode_layer_3
                          .custom_conv2d(n, k_h=3, k_w=3, d_h=1, d_w=1)
@@ -133,7 +133,7 @@ def began_discriminator(D_I, batch_size, hidden_size,
                          .apply(tf.nn.elu))
 
         decode_layer_4 = (decode_conv_6
-                          .apply(tf.image.resize_nearest_neighbor, [64, 64]))
+                          .apply(tf.image.resize_nearest_neighbor, [128, 128]))
 
         decode_conv_7 = (decode_layer_4
                          .custom_conv2d(n, k_h=3, k_w=3, d_h=1, d_w=1)

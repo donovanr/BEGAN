@@ -31,23 +31,23 @@ def loadData(size, offset=0):
         return faces / 255
 
 
-def loadJPGs(path='/home/arthur/devel/input/', width=64, height=64):
+def loadJPGs(path='/home/arthur/devel/input/', width=128, height=128):
     filenames = glob(path+"*.jpg")
     filenames = np.sort(filenames)
 
     def imread(path):
         return scipy.misc.imread(path)
 
-    def scaleHeight(x, height=64):
+    def scaleHeight(x, height=128):
         h, w = x.shape[:2]
         return scipy.misc.imresize(x, [height, int((float(w)/h)*height)])
 
-    def cropSides(x, width=64):
+    def cropSides(x, width=128):
         w = x.shape[1]
         j = int(round((w - width)/2.))
         return x[:, j:j+width, :]
 
-    def get_image(image_path, width=64, height=64):
+    def get_image(image_path, width=128, height=128):
         return cropSides(scaleHeight(imread(image_path), height=height),
                          width=width)
 

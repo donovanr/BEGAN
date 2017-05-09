@@ -28,7 +28,7 @@ def began_generator(Z, batch_size, scope_name="generator",
         reuse_scope: Tensorflow scope handling
     Returns:
         Flattened tensor of generated images, with dimensionality:
-            batch_size * 64 * 64 * 3
+            batch_size * 128 * 128 * 3
     '''
 
     n = 128  # 'n' is number of filter dimensions
@@ -39,9 +39,9 @@ def began_generator(Z, batch_size, scope_name="generator",
 
         layer_1 = (pt.wrap(Z)  # (hidden_size)
                    .flatten()
-                   .fully_connected(8 * 8 * n, activation_fn=tf.nn.elu)
+                   .fully_connected(16 * 16 * n, activation_fn=tf.nn.elu)
                    .fc_batch_norm()
-                   .reshape([-1, 8, 8, n]))  # '-1' is batch size
+                   .reshape([-1, 16, 16, n]))  # '-1' is batch size
 
         conv_1 = (layer_1
                   .custom_conv2d(n, k_h=3, k_w=3, d_h=1, d_w=1)
@@ -54,7 +54,7 @@ def began_generator(Z, batch_size, scope_name="generator",
                   .apply(tf.nn.elu))
 
         layer_2 = (conv_2
-                   .apply(tf.image.resize_nearest_neighbor, [16, 16]))
+                   .apply(tf.image.resize_nearest_neighbor, [32, 32]))
 
         conv_3 = (layer_2
                   .custom_conv2d(n, k_h=3, k_w=3, d_h=1, d_w=1)
@@ -67,7 +67,7 @@ def began_generator(Z, batch_size, scope_name="generator",
                   .apply(tf.nn.elu))
 
         layer_3 = (conv_4
-                   .apply(tf.image.resize_nearest_neighbor, [32, 32]))
+                   .apply(tf.image.resize_nearest_neighbor, [64, 64]))
 
         conv_5 = (layer_3
                   .custom_conv2d(n, k_h=3, k_w=3, d_h=1, d_w=1)
@@ -80,7 +80,7 @@ def began_generator(Z, batch_size, scope_name="generator",
                   .apply(tf.nn.elu))
 
         layer_4 = (conv_6
-                   .apply(tf.image.resize_nearest_neighbor, [64, 64]))
+                   .apply(tf.image.resize_nearest_neighbor, [128, 128]))
 
         conv_7 = (layer_4
                   .custom_conv2d(n, k_h=3, k_w=3, d_h=1, d_w=1)
