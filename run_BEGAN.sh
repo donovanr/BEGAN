@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
-GPUID=0
+# to run on eg GPU 2, use as:
+#     bash run_BEGAN.sh 2 
+
+GPUID=$1
 
 CUDA_VISIBLE_DEVICES=$GPUID python main.py \
 	--gpuid=$GPUID \
