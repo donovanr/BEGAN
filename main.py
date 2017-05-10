@@ -8,11 +8,15 @@ import numpy as np
 from utils.misc import plot_gens
 import time
 import os
+import pandas as pd
 from config import checkpoint_path, checkpoint_prefix
 
 
 class BEGAN:
-    loss_tracker = {'generator': [],
+    loss_tracker = {'epoch': [],
+                    'iteration': [],
+                    'k': [],
+                    'generator': [],
                     'discriminator': [],
                     'convergence_measure': []}
 
@@ -88,7 +92,7 @@ class BEGAN:
 
 
 def began_train(images, start_epoch=0, add_epochs=None, batch_size=16,
-                hidden_size=2048, dim=(128, 128, 3), gpu_id='/gpu:0',
+                hidden_size=2048, dim=(64, 64, 3), gpu_id='/gpu:0',
                 demo=False, get=False, start_learn_rate=1e-5, decay_every=50,
                 save_every=1, batch_norm=True, gamma=0.75):
 
@@ -155,19 +159,23 @@ def began_train(images, start_epoch=0, add_epochs=None, batch_size=16,
                 sess.run([G_train, D_train, D_loss, G_loss, k_tp, convergence_measure],
                          {learning_rate: learning_rate_,
                           next_batch: next_batch_, k_t: min(max(k_t_, 0), 1)})
-
+            loss_tracker['epoch'].append(epoch)
+            loss_tracker['iteration'].append(i)
+            loss_tracker['k'].append(k_t_)
             loss_tracker['generator'].append(G_loss_)
             loss_tracker['discriminator'].append(D_loss_)
-<<<<<<< HEAD
-            loss_tracker['convergence_measure'].append(0)
-            
-            # my logging hack
-            logging_data = np.array([loss_tracker['generator'],loss_tracker['discriminator'],loss_tracker['convergence_measure']])
-            logging_data = logging_data.T
-            np.savetxt("convergence_measure.txt", logging_data, fmt='%.15e', header="            generator         discriminator   convergence_measure", comments='')
-=======
             loss_tracker['convergence_measure'].append(M_)
->>>>>>> 9cfa9980e7620897a398a58eb94e719ac0eb8eaa
+
+        # every epoch, append convergence info from each iter in that epoch to master csv
+        lt_df = pd.DataFrame.from_dict(loss_tracker)
+        lt_df = lt_df[['epoch','iteration', 'k', 'generator','discriminator','convergence_measure']]
+        fname = 'convergence_measure.csv'
+        if (epoch == 0) or (not os.path.isfile(fname)):
+            with open(fname, 'w') as f:
+                lt_df.to_csv(f, header=True)
+        else:
+            with open(fname, 'a') as f:
+                lt_df.to_csv(f, header=False)
 
         if epoch % save_every == 0:
             path = '{}/{}_{}.tfmod'.format(checkpoint_path,
@@ -180,7 +188,7 @@ def began_train(images, start_epoch=0, add_epochs=None, batch_size=16,
         batch = dataIterator([images], batch_size).__next__()
         ims = sess.run(x_tilde)
         plot_gens((ims, batch),
-                  ('Generated 128x128 samples.', 'Random training images.'),
+                  ('Generated 64x64 samples.', 'Random training images.'),
                   loss_tracker)
         if get:
             return ims
@@ -275,13 +283,12 @@ if __name__ == '__main__':
                 batch_norm=args.batch_norm)
 
     if not args.train:
-        import os
         import matplotlib
         matplotlib.use('Agg')
         import matplotlib.pyplot as plt
         if not os.path.exists(args.outdir):
                 os.makedirs(args.outdir)
         for n in range(8):
-            im_to_save = im[n].reshape([128, 128, 3])
+            im_to_save = im[n].reshape([64, 64, 3])
             plt.imsave(args.outdir+'/out_{}.jpg'.format(n),
                        im_to_save)

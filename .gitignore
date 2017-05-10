@@ -1,7 +1,10 @@
+.nfs*
+
 __pycache__
 */__pycache__
 
 datasets/
 output/
 checkpoints/
+convergence_measure.csv
 
