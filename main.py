@@ -8,11 +8,15 @@ import numpy as np
 from utils.misc import plot_gens
 import time
 import os
+import pandas as pd
 from config import checkpoint_path, checkpoint_prefix
 
 
 class BEGAN:
-    loss_tracker = {'generator': [],
+    loss_tracker = {'epoch': [],
+                    'iteration': [],
+                    'k': [],
+                    'generator': [],
                     'discriminator': [],
                     'convergence_measure': []}
 
@@ -155,15 +159,23 @@ def began_train(images, start_epoch=0, add_epochs=None, batch_size=16,
                 sess.run([G_train, D_train, D_loss, G_loss, k_tp, convergence_measure],
                          {learning_rate: learning_rate_,
                           next_batch: next_batch_, k_t: min(max(k_t_, 0), 1)})
-
+            loss_tracker['epoch'].append(epoch)
+            loss_tracker['iteration'].append(i)
+            loss_tracker['k'].append(k_t_)
             loss_tracker['generator'].append(G_loss_)
             loss_tracker['discriminator'].append(D_loss_)
             loss_tracker['convergence_measure'].append(M_)
 
-            # my logging hack
-            logging_data = np.array([loss_tracker['generator'],loss_tracker['discriminator'],loss_tracker['convergence_measure']])
-            logging_data = logging_data.T
-            np.savetxt("convergence_measure.txt", logging_data, fmt='%.15e', header="            generator         discriminator   convergence_measure", comments='')
+        # every epoch, append convergence info from each iter in that epoch to master csv
+        lt_df = pd.DataFrame.from_dict(loss_tracker)
+        lt_df = lt_df[['epoch','iteration', 'k', 'generator','discriminator','convergence_measure']]
+        fname = 'convergence_measure.csv'
+        if (epoch == 0) or (not os.path.isfile(fname)):
+            with open(fname, 'w') as f:
+                lt_df.to_csv(f, header=True)
+        else:
+            with open(fname, 'a') as f:
+                lt_df.to_csv(f, header=False)
 
         if epoch % save_every == 0:
             path = '{}/{}_{}.tfmod'.format(checkpoint_path,
@@ -271,7 +283,6 @@ if __name__ == '__main__':
                 batch_norm=args.batch_norm)
 
     if not args.train:
-        import os
         import matplotlib
         matplotlib.use('Agg')
         import matplotlib.pyplot as plt
