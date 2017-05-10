@@ -151,19 +151,23 @@ def began_train(images, start_epoch=0, add_epochs=None, batch_size=16,
             learning_rate_ = start_learn_rate * pow(0.5, epoch // decay_every)
             next_batch_ = next(iter_)
 
-            _, _, D_loss_, G_loss_, k_t_ = \
-                sess.run([G_train, D_train, D_loss, G_loss, k_tp],
+            _, _, D_loss_, G_loss_, k_t_, M_ = \
+                sess.run([G_train, D_train, D_loss, G_loss, k_tp, convergence_measure],
                          {learning_rate: learning_rate_,
                           next_batch: next_batch_, k_t: min(max(k_t_, 0), 1)})
 
             loss_tracker['generator'].append(G_loss_)
             loss_tracker['discriminator'].append(D_loss_)
+<<<<<<< HEAD
             loss_tracker['convergence_measure'].append(0)
             
             # my logging hack
             logging_data = np.array([loss_tracker['generator'],loss_tracker['discriminator'],loss_tracker['convergence_measure']])
             logging_data = logging_data.T
             np.savetxt("convergence_measure.txt", logging_data, fmt='%.15e', header="            generator         discriminator   convergence_measure", comments='')
+=======
+            loss_tracker['convergence_measure'].append(M_)
+>>>>>>> 9cfa9980e7620897a398a58eb94e719ac0eb8eaa
 
         if epoch % save_every == 0:
             path = '{}/{}_{}.tfmod'.format(checkpoint_path,
