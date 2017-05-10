@@ -7,6 +7,7 @@ import tqdm
 import numpy as np
 from utils.misc import plot_gens
 import time
+import os
 from config import checkpoint_path, checkpoint_prefix
 
 
@@ -158,11 +159,18 @@ def began_train(images, start_epoch=0, add_epochs=None, batch_size=16,
             loss_tracker['generator'].append(G_loss_)
             loss_tracker['discriminator'].append(D_loss_)
             loss_tracker['convergence_measure'].append(0)
+            
+            # my logging hack
+            logging_data = np.array([loss_tracker['generator'],loss_tracker['discriminator'],loss_tracker['convergence_measure']])
+            logging_data = logging_data.T
+            np.savetxt("convergence_measure.txt", logging_data, fmt='%.15e', header="            generator         discriminator   convergence_measure", comments='')
 
         if epoch % save_every == 0:
             path = '{}/{}_{}.tfmod'.format(checkpoint_path,
                                            checkpoint_prefix,
                                            str(epoch).zfill(4))
+            if not os.path.exists(checkpoint_path):
+                os.makedirs(checkpoint_path)
             saver.save(sess, path)
     if demo:
         batch = dataIterator([images], batch_size).__next__()
