@@ -175,7 +175,7 @@ def began_train(images, start_epoch=0, add_epochs=None, batch_size=16,
                 lt_df.to_csv(f, header=True)
         else:
             with open(fname, 'a') as f:
-                lt_df.to_csv(f, header=False)
+                lt_df.loc[lt_df['epoch'] == epoch].to_csv(f, header=False)
 
         if epoch % save_every == 0:
             path = '{}/{}_{}.tfmod'.format(checkpoint_path,
@@ -288,7 +288,7 @@ if __name__ == '__main__':
         import matplotlib.pyplot as plt
         if not os.path.exists(args.outdir):
                 os.makedirs(args.outdir)
-        for n in range(8):
+        for n in range(32):
             im_to_save = im[n].reshape([64, 64, 3])
             plt.imsave(args.outdir+'/out_{}.jpg'.format(n),
                        im_to_save)
