@@ -288,7 +288,7 @@ if __name__ == '__main__':
         import matplotlib.pyplot as plt
         if not os.path.exists(args.outdir):
                 os.makedirs(args.outdir)
-        for n in range(32):
+        for n in range(16):
             im_to_save = im[n].reshape([64, 64, 3])
             plt.imsave(args.outdir+'/out_{}.jpg'.format(n),
                        im_to_save)
