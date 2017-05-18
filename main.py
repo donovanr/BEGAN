@@ -7,6 +7,7 @@ import tqdm
 import numpy as np
 from utils.misc import plot_gens
 import time
+import sys
 import os
 import pandas as pd
 from config import checkpoint_path, checkpoint_prefix
@@ -149,16 +150,18 @@ def began_train(images, start_epoch=0, add_epochs=None, batch_size=16,
     num_batches_per_epoch = int(len(images) / batch_size)
     for epoch in range(start_epoch, num_epochs):
         print('Epoch {} / {}'.format(epoch + 1, num_epochs + 1))
+        learning_rate_ = start_learn_rate * pow(0.5, epoch // decay_every)
+        print('learning rate = {}'.format(learning_rate_))
+
         for i in tqdm.tqdm(range(num_batches_per_epoch)):
             iter_ = dataIterator([images], batch_size)
-
-            learning_rate_ = start_learn_rate * pow(0.5, epoch // decay_every)
             next_batch_ = next(iter_)
 
             _, _, D_loss_, G_loss_, k_t_, M_ = \
                 sess.run([G_train, D_train, D_loss, G_loss, k_tp, convergence_measure],
                          {learning_rate: learning_rate_,
                           next_batch: next_batch_, k_t: min(max(k_t_, 0), 1)})
+
             loss_tracker['epoch'].append(epoch)
             loss_tracker['iteration'].append(i)
             loss_tracker['k'].append(k_t_)
@@ -184,6 +187,23 @@ def began_train(images, start_epoch=0, add_epochs=None, batch_size=16,
             if not os.path.exists(checkpoint_path):
                 os.makedirs(checkpoint_path)
             saver.save(sess, path)
+
+        # every epoch print out 16 generated images
+        batch = dataIterator([images], batch_size).__next__()
+        sample_images = sess.run(x_tilde)
+        import matplotlib
+        matplotlib.use('Agg')
+        import matplotlib.pyplot as plt
+        img_dir= 'sample_images'
+        if not os.path.exists(img_dir):
+            os.makedirs(img_dir)
+        for n in range(16):
+            im_to_save = sample_images[n].reshape([128, 128, 3])
+            im_name = 'epoch_{}_sample_{}.jpg'.format(epoch, n)
+            im_fname = os.path.join(img_dir, im_name)
+            plt.imsave(im_fname, im_to_save)
+
+
     if demo:
         batch = dataIterator([images], batch_size).__next__()
         ims = sess.run(x_tilde)
@@ -263,8 +283,10 @@ if __name__ == '__main__':
 
     parser.add_argument('--outdir', type=str, default='output',
                         help='Path to save output generations')
-
+    # debug argparse
+    print(sys.argv)
     args = parser.parse_args()
+    print(args)
     if args.gpuid == -1:
         args.gpuid = '/cpu:0'
     else:
@@ -275,10 +297,11 @@ if __name__ == '__main__':
 
     if not args.train:
         args.train = False
+    print(args)
 
     im = _train(start_epoch=args.start_epoch, add_epochs=args.add_epochs,
                 batch_size=args.batch_size, hidden_size=args.hidden_size,
-                gpu_id=args.gpuid, train=args.train,
+                gpu_id=args.gpuid, train=args.train, start_learn_rate=args.start_learn_rate,
                 save_every=args.save_every, decay_every=args.decay_every,
                 batch_norm=args.batch_norm)
 

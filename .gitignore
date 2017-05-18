@@ -4,6 +4,7 @@ __pycache__
 */__pycache__
 
 datasets/
+sample_images/
 output/
 checkpoints/
 convergence_measure.csv
