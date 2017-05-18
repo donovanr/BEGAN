@@ -284,9 +284,7 @@ if __name__ == '__main__':
     parser.add_argument('--outdir', type=str, default='output',
                         help='Path to save output generations')
     # debug argparse
-    print(sys.argv)
     args = parser.parse_args()
-    print(args)
     if args.gpuid == -1:
         args.gpuid = '/cpu:0'
     else:
@@ -297,7 +295,6 @@ if __name__ == '__main__':
 
     if not args.train:
         args.train = False
-    print(args)
 
     im = _train(start_epoch=args.start_epoch, add_epochs=args.add_epochs,
                 batch_size=args.batch_size, hidden_size=args.hidden_size,
